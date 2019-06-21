@@ -105,9 +105,12 @@ int main(int argc, char *argv[])
     Theron::Framework framework(endPoint);
 
     // The unique name of the actor allows the client to send it messages remotely.
+	// actor的唯一名称允许客户端远程发送消息
     Printer printer(framework, "printer");
 
     receiver.Wait();
+
+	return 0;
 }
 
 

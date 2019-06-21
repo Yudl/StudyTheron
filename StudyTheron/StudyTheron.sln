@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StudyTheron", "StudyTheron\StudyTheron.vcxproj", "{1FAC30B1-4D8D-49A4-B359-AD20BB17F6DD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Theron", "..\Theron-6.00.02\Theron\Theron.vcxproj", "{8C0827D2-EFA0-427B-96B2-A92158E7812F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -23,14 +21,6 @@ Global
 		{1FAC30B1-4D8D-49A4-B359-AD20BB17F6DD}.Release|x64.Build.0 = Release|x64
 		{1FAC30B1-4D8D-49A4-B359-AD20BB17F6DD}.Release|x86.ActiveCfg = Release|Win32
 		{1FAC30B1-4D8D-49A4-B359-AD20BB17F6DD}.Release|x86.Build.0 = Release|Win32
-		{8C0827D2-EFA0-427B-96B2-A92158E7812F}.Debug|x64.ActiveCfg = Debug|x64
-		{8C0827D2-EFA0-427B-96B2-A92158E7812F}.Debug|x64.Build.0 = Debug|x64
-		{8C0827D2-EFA0-427B-96B2-A92158E7812F}.Debug|x86.ActiveCfg = Debug|Win32
-		{8C0827D2-EFA0-427B-96B2-A92158E7812F}.Debug|x86.Build.0 = Debug|Win32
-		{8C0827D2-EFA0-427B-96B2-A92158E7812F}.Release|x64.ActiveCfg = Release|x64
-		{8C0827D2-EFA0-427B-96B2-A92158E7812F}.Release|x64.Build.0 = Release|x64
-		{8C0827D2-EFA0-427B-96B2-A92158E7812F}.Release|x86.ActiveCfg = Release|Win32
-		{8C0827D2-EFA0-427B-96B2-A92158E7812F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

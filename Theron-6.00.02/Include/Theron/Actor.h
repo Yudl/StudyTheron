@@ -103,7 +103,7 @@ public:
     \brief Explicit constructor.
 
     Constructs an actor within the given \ref Framework, with the given unique name.
-    If the name parameter is null then the actor is given an automatically generated name.
+    If the name parameter is null then the actor is given an automatically generated name.自动生成的名称
 
     The Actor baseclass constructor expects an instance of the Framework class,
     which becomes the owning Framework for the actor, hosting it and executing its
@@ -114,6 +114,7 @@ public:
     is to just expose the same parameter on the constructor of the derived actor,
     and pass it through to the baseclass constructor in the initializer list:
 
+	可选的name参数允许赋予构造的actor对象唯一
     The optional name parameter allows constructed actor objects to be given unique,
     user-defined names. These names can then be used to send messages to the actors in
     situations where the sending code has no direct reference to the destination actor, so
@@ -128,10 +129,10 @@ public:
     to be unique across all processes if each \ref EndPoint in the system is given a unique,
     user-defined name on construction.
 
+	使用其名称向actor发送消息涉及散列查找因此比使用直接检索的地址慢
     \note Sending a message to an actor using only its name requires an \ref EndPoint.
     It involves a hashed lookup, so is slower than using an address retrieved directly
     from the target actor using \ref GetAddress.
-
     \code
     class MyActor : public Theron::Actor
     {

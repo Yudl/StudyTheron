@@ -25,7 +25,7 @@ private:
 	};
 };
 
-int main()
+int main1()
 {
 	// 构造Framework对象,并且实例化一个Printer的Actor由它管理
 	Theron::Framework framework;
