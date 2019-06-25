@@ -1,6 +1,11 @@
 #include "Theron/Theron.h"
 #include <iostream>
-
+#include <vector>
+#include <queue>
+#pragma comment( lib, "Theron.lib" )
+/*
+ 1.单线程按先后顺序来执行操作的
+*/
 // 通用多线程系统形式“Worker”
 template<typename WorkMessage>
 class Worker : public Theron::Actor
@@ -71,13 +76,82 @@ public:
 		return mBuffer;
 	}
 
-private:
+	bool Processed()
+	{
+		return mProcessed;
+	}
+
+	Theron::Address Client()
+	{
+		return mClient;
+	}
+
+public:
 	Theron::Address mClient;	//请求客户的地址
 	const char* mFileName;		//请求文件的名称
 	bool mProcessed;			//文件是否被读取过
 	unsigned char* mBuffer;		//文件内容的缓冲区
 	unsigned int mBufferSize;	//缓冲区的大小
 	unsigned int mFileSize;		//文件的字节长度
+};
+
+/*
+ 2.多线程并行来执行操作的
+*/
+template <typename WorkMessage>
+class Dispatcher : public Theron::Actor
+{
+public:
+	Dispatcher(Theron::Framework &framework, const int WorkerCount) : Theron::Actor(framework)
+	{
+		for (int i = 0; i < WorkerCount; ++i)
+		{
+			mWorkers.push_back(new WorkType(framework));
+			mFreeQueue.push(mWorkers.back()->GetAddress());
+		}
+
+		RegisterHandler(this, &Dispatcher::Handler);
+	}
+
+	~Dispatcher()
+	{
+		const int nSize(static_cast<int>(mWorkers.size()));
+		for (int i = 0; i < nSize; ++i)
+		{
+			delete mWorkers[i];
+		}
+	}
+
+private:
+	typedef Worker<WorkMessage> WorkType;
+
+	void Handler(const WorkMessage &message, const Theron::Address from)
+	{
+		// 处理过
+		if (message.mProcessed)
+		{
+			// 发送消息
+			Send(message, message.mClient);
+			// 处理完放到空闲队列
+			mFreeQueue.push(from);
+		}
+		else
+		{	// 加入工作队列
+			mWorkQueue.push(message);
+		}
+
+		// 处理工作消息队列
+		while (!mWorkQueue.empty() && !mFreeQueue.empty())
+		{
+			Send(mWorkQueue.front(), mFreeQueue.front());
+			mWorkQueue.pop();
+			mFreeQueue.pop();
+		}
+	}
+
+	std::vector<WorkType*> mWorkers;	//拥有Workers的指针
+	std::queue<Theron::Address> mFreeQueue;	//空闲workers队列
+	std::queue<WorkMessage> mWorkQueue;	//未处理的工作消息队列
 };
 
 static const int MAX_FILES = 16;
@@ -87,10 +161,11 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-
+		printf("Expected up to 16 file name arguments.\n");
 		return 0;
 	}
 
+	/* 方案1：
 	// 创建一个worker去处理
 	Theron::Framework framework;
 	Worker<ReadRequest> worker(framework);
@@ -99,22 +174,43 @@ int main(int argc, char *argv[])
 	Theron::Receiver receiver;
 	Theron::Catcher<ReadRequest> resultCatcher;
 	receiver.RegisterHandler(&resultCatcher, &Theron::Catcher<ReadRequest>::Push);
-	// 命令行上每个文件名称作为请求消息
+	*/
+
+	/* 方案2：
+	*/
+	Theron::Framework::Parameters parameters;
+	parameters.mThreadCount = MAX_FILES;
+	parameters.mProcessorMask = (1UL << 0) | (1UL << 1);//限制工作线程为前两个处理器核
+	// 根据配置参数创建
+	Theron::Framework framework(parameters);
+	Theron::Receiver receiver;
+	Theron::Catcher<ReadRequest> resultCatcher;
+	receiver.RegisterHandler(&resultCatcher, &Theron::Catcher<ReadRequest>::Push);
+
+	Dispatcher<ReadRequest> dispatcher(framework, MAX_FILES);
+
+	/* 共用部分：
+	*/
+	// 发送工作请求,命令行上每个文件名称作为请求消息
 	for (int i = 0; i < MAX_FILES && i + 1 < argc; ++i)
 	{
-		unsigned char *const buffer = new unsigned char[MAX_FILE_SIZE];
+		unsigned char* const buffer = new unsigned char[MAX_FILE_SIZE];
 		const ReadRequest message(
 			receiver.GetAddress(),
 			argv[i + 1],
 			buffer,
-			MAX_FILE_SIZE);
-		framework.Send(message, receiver.GetAddress(), worker.GetAddress());
+			MAX_FILE_SIZE
+		);
+
+		framework.Send(message, receiver.GetAddress(), dispatcher.GetAddress());
 	}
+
 	// 等待所有结果 
 	for (int i = 1; i < argc; ++i)
 	{
 		receiver.Wait();
 	}
+
 	// 处理结果，我们仅打印文件的名称
 	ReadRequest result;
 	Theron::Address from;

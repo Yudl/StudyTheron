@@ -95,7 +95,7 @@ private:
 
 // A dispatcher actor that processes work items.
 // Internally the dispatcher creates and controls a pool of workers.
-// It coordinates the workers to process the work items in parallel.
+// It coordinates the workers to process the work items in parallel.它协调workers并行处理工作项目
 template <class WorkMessage>
 class Dispatcher : public Theron::Actor
 {
